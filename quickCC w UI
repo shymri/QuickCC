@@ -1,0 +1,302 @@
+#######THE BEST AND WORST CC MAKER OF ALL TIME WHAT IS UP MY DUDES
+import maya.cmds as mc
+
+def UI(*args):
+    ###window
+    #check if window exists
+    if mc.window("ccUI", exists=True):
+        mc.deleteUI("ccUI")
+        
+    #create window
+    window=mc.window('ccUI', title = 'Quick CC', w=300, h=425, mnb=False, mxb=False, sizeable=True)
+    mc.columnLayout(w=300,h=300)      
+
+    #name of this joke on wheels
+    mc.text(l="Joint Name without _JNT_01 or _BN_01")
+    nameInput=mc.textField('RIPME',aie=True,w=290, ec = Create)
+        
+    #joint name
+    mc.separator()
+    mc.text( label='Making a control for a bone?')
+    mc.separator()
+    BNinput=mc.checkBox('bnYe', label='yes')
+    
+    #Ribbon Secondary
+    mc.separator()
+    mc.text( label='making control for ribbon bone?')
+    mc.separator()
+    RIBinput=mc.checkBox('ribYe', label='yes')
+    
+    #Square control??
+    mc.separator()
+    mc.text( label='You want a cube control? (only for general control)')
+    mc.separator()
+    BfNinput=mc.checkBox('cubeYe', label='yes')
+    
+    #IK or FK
+    mc.separator()
+    mc.text( label='Making FK control?')
+    mc.separator()
+    BfNinput=mc.checkBox('fkYe', label='yes')
+    
+    mc.separator()
+    mc.text( label='Making IK control?')
+    mc.separator()
+    BNinput=mc.checkBox('ikYe', label='yes')
+    
+    #IK Handle Name 
+    mc.separator()
+    mc.text( label='IK Handle full name' )
+    mc.separator()
+    IKname = mc.textField('dying',w=290)
+    
+    #poleVector garbage
+    #name of elbow or knee joint, create the stuff you need for it, position
+    mc.separator() 
+    mc.text('Making Pole Vector control?')
+    mc.separator()
+    mc.checkBox('pvYe',label='Yes')
+       
+    #Parenting
+    mc.separator() 
+    mc.text('Would you like to parent this control under something??')
+    mc.separator()
+    mc.checkBox('ParYe',label='Yes')
+    
+    mc.separator()
+    mc.text( label='Parent' )
+    mc.separator()
+    Pname = mc.textField('dg',w=290)
+    
+    #scale input
+    mc.separator()
+    mc.text(l="scale (default 1.0)")
+    scaleSet=mc.textField('scaleSet',w=50, pht = "1.0", aie = True, ec = Create)
+    
+    
+    #BUTTON
+    mc.separator()
+    mc.separator()
+    dotheDamnthing=mc.button(label='create',w=300,h=50,c=Create)
+
+    #show window
+    mc.showWindow( 'ccUI' )
+
+##ALL THE DEFINITIONS##
+        
+def Create (*args):
+    name=mc.textField('RIPME',q=True,text=True)
+    BNgo=mc.checkBox('bnYe',q=True,v=True)
+    Cubego=mc.checkBox('cubeYe',q=True,v=True)
+    Ribgo=mc.checkBox('ribYe',q=True,v=True)
+    FKgo=mc.checkBox('fkYe',q=True,v=True)
+    IKgo=mc.checkBox('ikYe',q=True,v=True)
+    IKHgo=mc.textField('dying',q=True,text=True)
+    PVgo=mc.checkBox('pvYe',q=True,v=True)
+    ParBool=mc.checkBox('ParYe',q=True,v=True)
+    ParGo=mc.textField('dg',q=True,text=True)
+    scale = float(mc.textField('scaleSet', q=True, text = True))
+    
+    #create nurb cube that isn't stupid
+        
+    def ccCube():
+        #top
+        mc.curve( point=[(-0.5,0.5,0.5), (0.5,0.5,0.5)], knot=[0,1], degree=1, name= name + '_cc_01')
+        mc.curve( point=[(-0.5,0.5,-0.5), (0.5,0.5,-0.5)], knot=[0,1], degree=1, name= name + '_1_cc_01' )
+        mc.curve( point=[(-0.5,0.5,0.5), (-0.5,0.5,-0.5)], knot=[0,1], degree=1, name= name + '_2_cc_01' )
+        mc.curve( point=[(0.5,0.5,-0.5), (0.5,0.5,0.5)], knot=[0,1], degree=1, name= name + '_3_cc_01' )
+        #bottom
+        mc.curve( point=[(-0.5,-0.5,0.5), (0.5,-0.5,0.5)], knot=[0,1], degree=1, name= name + '_4_cc_01' )
+        mc.curve( point=[(-0.5,-0.5,-0.5), (0.5,-0.5,-0.5)], knot=[0,1], degree=1, name= name + '_5_cc_01' )
+        mc.curve( point=[(-0.5,-0.5,0.5), (-0.5,-0.5,-0.5)], knot=[0,1], degree=1, name= name + '_6_cc_01' )
+        mc.curve( point=[(0.5,-0.5,-0.5), (0.5,-0.5,0.5)], knot=[0,1], degree=1, name= name + '_7_cc_01' )
+        #sides
+        mc.curve( point=[(-0.5,-0.5,0.5), (-0.5,0.5,0.5)], knot=[0,1], degree=1, name= name + '_8_cc_01' )
+        mc.curve( point=[(-0.5,-0.5,-0.5), (-0.5,0.5,-0.5)], knot=[0,1], degree=1, name= name + '_9_cc_01' )
+        mc.curve( point=[(0.5,-0.5,0.5), (0.5,0.5,0.5)], knot=[0,1], degree=1, name= name + '_10_cc_01' )
+        mc.curve( point=[(0.5,-0.5,-0.5), (0.5,0.5,-0.5)], knot=[0,1], degree=1, name= name + '_11_cc_01' )
+        #combine
+        control_object = name + '_cc_01'
+        for number in range(1,12):
+        	mc.parent( mc.listRelatives( name + '_' + str(number) + '_cc_01', shapes=True ), control_object, relative=True, shape=True)
+        	mc.delete(name + '_' + str(number) + '_cc_01')
+        control_shapes = mc.listRelatives( control_object, shapes=True )
+        for control_shape in control_shapes:
+            mc.setAttr( control_shape + '.overrideEnabled', True)
+            if 'LFT' in str(control_object):
+                mc.setAttr( control_shape + '.overrideColor', 6 )
+                if 'settings' in str(control_object) or 'secondary' in str(control_object) or 'ribbon' in str(control_object):
+                    mc.setAttr( control_shape + '.overrideColor', 15 )
+            elif 'RGT' in str(control_object):
+                mc.setAttr( control_shape + '.overrideColor', 13 )
+                if 'settings' in str(control_object) or 'secondary' in str(control_object) or 'ribbon' in str(control_object):
+                    mc.setAttr( control_shape + '.overrideColor', 12 )
+            else:
+                mc.setAttr( control_shape + '.overrideColor', 22 )
+                if 'settings' in str(control_object) or 'secondary' in str(control_object) or 'ribbon' in str(control_object):
+                    mc.setAttr( control_shape + '.overrideColor', 25 ) 
+                    
+        #create offset group
+        mc.group(n=name+'_cc_os_grp_01')
+    
+    def FKcc():
+        #create and place cc
+        #BN=int(raw_input())
+        if BNgo is True:
+            Jboi=name+'_BN_01'
+        else:
+            Jboi=name+'_JNT_01'
+        mc.circle(n='hi')
+        mc.setAttr('hiShape.overrideEnabled',True)
+
+        if 'LFT' in name:
+            mc.setAttr('hiShape.overrideColor',6)
+        
+        elif 'RGT' in name:
+            mc.setAttr('hiShape.overrideColor',13)
+        
+        else:
+            mc.setAttr('hiShape.overrideColor',22)
+            
+        grp=mc.group(n=name+ '_cc_os_grp_01')
+        mc.select(Jboi, r=True)
+        mc.rename('lol')
+        mc.parent(grp, r=True)
+        mc.parent(w=True)
+        mc.connectAttr('hi.rotate', 'lol.rotate', f=True)
+        mc.select('lol', r=True)
+        mc.rename(Jboi)
+        mc.select('hi')
+        ccname=mc.rename(name+ '_cc_01')
+        
+        #lock and hide unnecessary attributes
+        mc.setAttr(name+'_cc_01.tx',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.ty',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.tz',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.sx',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.sy',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.sz',lock=True,keyable=False,channelBox=False)
+        mc.setAttr(name+'_cc_01.v',lock=True,keyable=False,channelBox=False)
+        
+        #optional parenting
+        if ParBool is True:
+            mc.parent(grp,ParGo)
+        
+        #manual adjustments to cc
+        mc.select(ccname+'.cv[0:7]')
+        mc.rotate(0,90,0)
+   
+    def IKcc():
+        
+        
+        #POSITION IK
+        if PVgo is False:
+            ccCube()
+            mc.select(IKHgo, r=True)
+            PVcc=mc.parent(name+'_cc_os_grp_01', r=True)
+            mc.parent(w=True)
+            mc.select(name+'_cc_os_grp_01')
+            mc.rotate(0,0,0)
+            mc.parentConstraint(name+'_cc_01',IKHgo, mo=True)
+            mc.select(cl=True)
+            
+        #code to make pole vector work lololol
+        else:
+            ccCube()
+            mc.select(name+'_JNT_01',r=True)
+            PVcc=mc.parent(name+'_cc_os_grp_01', r=True)
+            mc.parent(w=True)
+            mc.poleVectorConstraint(name+'_cc_01',IKHgo)
+            #in order to manually adjust Pole Vector cc from Joint
+            mc.select(name+'_cc_os_grp_01')
+        mc.setAttr( name + "_cc_01.scaleX", lock=True, keyable=False, channelBox=False)
+        mc.setAttr( name + "_cc_01.scaleY", lock=True, keyable=False, channelBox=False)
+        mc.setAttr( name + "_cc_01.scaleZ", lock=True, keyable=False, channelBox=False)
+        mc.setAttr( name + "_cc_01.visibility", lock=True, keyable=False, channelBox=False)
+                
+        #optional parenting
+        if ParBool is True:
+            mc.parent(PVcc,ParGo)
+            
+    
+    def PCcc():
+        if Ribgo is True:
+            Jboi = name + '_BN_01'
+            jParent = mc.listRelatives(name + '_BN_01', p = True)
+            
+            if Cubego is True:
+                ccCube()
+                mc.select(name + '_cc_os_grp_01')
+                mc.scale(1*scale,1*scale,1*scale)
+                mc.delete(mc.parentConstraint(Jboi, name + '_cc_os_grp_01'))
+                mc.parent(Jboi, name + '_cc_01')
+                mc.parent(name + '_cc_os_grp_01',jParent)
+
+            else:
+                mc.circle(n = name + "_cc_01")
+                mc.group(name + '_cc_01', n = name + '_cc_os_grp_01')
+                mc.select(name + '_cc_os_grp_01')
+                mc.scale(1*scale,1*scale,1*scale)
+                mc.setAttr(name + '_cc_01Shape.overrideEnabled',True)
+                if 'LFT' in name:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',15)
+                
+                elif 'RGT' in name:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',12)
+                
+                else:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',25)
+                mc.select(name+'_cc_01.cv[0:7]')
+                mc.rotate(90,0,0)
+                mc.delete(mc.parentConstraint(Jboi, name + '_cc_os_grp_01'))
+                mc.parent(Jboi, name + '_cc_01')
+                mc.parent(name + '_cc_os_grp_01',jParent)
+                
+        else:
+            if BNgo is True:
+                Jboi = name + '_BN_01'
+            else:
+                Jboi = name + '_JNT_01'
+            
+            if Cubego is True:
+                ccCube()
+                mc.select(name + '_cc_os_grp_01')
+                mc.scale(1*scale,1*scale,1*scale)
+                mc.delete(mc.parentConstraint(Jboi, name + '_cc_os_grp_01'))
+                mc.parentConstraint(name + '_cc_01', Jboi)
+                #move to correct location and constrain
+                
+            else:
+                mc.circle(n = name + "_cc_01")
+                mc.group(name + '_cc_01', n = name + '_cc_os_grp_01')
+                mc.select(name + '_cc_os_grp_01')
+                mc.scale(1*scale,1*scale,1*scale)
+                mc.setAttr(name + '_cc_01Shape.overrideEnabled',True)
+                if 'LFT' in name:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',6)
+                
+                elif 'RGT' in name:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',13)
+                
+                else:
+                    mc.setAttr(name + '_cc_01Shape.overrideColor',22)
+                mc.select(name+'_cc_01.cv[0:7]')
+                mc.rotate(0,90,0)
+                mc.delete(mc.parentConstraint(Jboi, name + '_cc_os_grp_01'))
+                mc.parentConstraint(name + '_cc_01', Jboi)
+            
+        #optional parenting
+        if ParBool is True:
+            mc.parent(name + '_cc_os_grp_01',ParGo)
+
+        
+    if IKgo is True:
+        IKcc()
+        
+    elif FKgo is True:
+        FKcc()
+    
+    else:
+        PCcc()
+        
+UI() 
